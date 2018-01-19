@@ -1,6 +1,12 @@
 // Namespace
 var pascal = pascal || {};
 
+// Global variables
+
+var dials = [];
+var mainCanvas;
+var mainContext;
+
 //constructor
 pascal.Widget = function(width, height, canvasId) {
 	this._width = width;
@@ -25,36 +31,42 @@ pascal.Clock.prototype.constructor = pascal.Clock;
 
 
 // clock methods
-pascal.Clock.prototype._drawClock = function() {
-	var context = this._context;
-	
-	this.centerX = this._width / 2;
-	this.centerY = this._height / 2;
+function drawClock() {	
 
-	if ( this._width > this._height ) {
-		this.radius = this._width / 2 - 2;	
+	centerX = mainCanvas.width / 2;
+	centerY = mainCanvas.height / 2;
+
+	if ( mainCanvas.width > mainCanvas.height ) {
+		radius = width / 2 - 2;	
 	} else {
-		this.radius = this._height / 2 - 2;
+		radius = mainCanvas.height / 2 - 2;
 	}
 	
 
-	context.beginPath();
-	context.arc(this.centerX, this.centerY, this.radius, 0, 2 * Math.PI, false);
-	context.fillStyle = '#d3d6db'; 
-	context.fill();
-	context.lineWidth = 4;
-	context.strokeStyle = '#484848';
-	context.stroke();
+	mainContext.beginPath();
+	mainContext.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+	mainContext.fillStyle = '#f3f3f3'; 
+	mainContext.fill();
+	mainContext.lineWidth = 2;
+	mainContext.strokeStyle = '#dedede';
+	mainContext.stroke();
 
 }
 
+function convertToRadians(degrees) {
+	var radians = degrees * Math.PI / 180;
 
-function drawAndUpdate(dials, clock) {
-	context = clock._context;
+	return radians;
+}
+
+
+function drawAndUpdate() {
+
+	var clock = clock;
 
 	// canvas opschonen en daarna nieuwe klok tekenen
-	context.clearRect(0, 0, 500, 500);
-	clock._drawClock();
+	mainContext.clearRect(0, 0, 500, 500);
+	drawClock();
 	
 	for (var i = 0; i < dials.length; i++) {
 
@@ -62,46 +74,46 @@ function drawAndUpdate(dials, clock) {
 		dial._update();
 	}
 
-	var self = this;
+	console.log('test');
 
-	// requestAnimationFrame(drawAndUpdate(dials, clock));
+	requestAnimationFrame(drawAndUpdate)
 }
 
 
 pascal.Clock.prototype.init = function(allDials) {
 	document.write(this.getHtml());
-	this._canvas = document.getElementById(this._canvasId);
-	this._context = this._canvas.getContext('2d');
+	mainCanvas = document.getElementById(this._canvasId);
+	mainContext = mainCanvas.getContext('2d');
 
 	var date = new Date();
-	var hours = date.getHours();
-	var minutes = date.getMinutes();
-	var seconds = date.getSeconds();
+	var hours = date.getHours() % 12 || 12;
+	var hourDegrees = 0.5 * (60 * hours + date.getMinutes());
+	console.log(hourDegrees);
+	var minutesDegrees = date.getMinutes() * 6;
+	var secondsDegrees = date.getSeconds() * 6;
 
-	var dials = [];
+	
 
-	var hourDial = new pascal.Dials(this._canvas, 4, 'black', 0.75, hours * 15);
+	var hourDial = new pascal.Dials(3, '#c1c1c1', 0.75, hourDegrees - 90);
 	dials.push(hourDial);
 
-	var minutesDial = new pascal.Dials(this._canvas, 2, 'grey', 0.9, minutes * 6);
+	var minutesDial = new pascal.Dials(2, '#c1c1c1', 0.9, minutesDegrees - 90);
 	dials.push(minutesDial);
 
 	if (allDials == 'all') {
-		var secondsDial = new pascal.Dials(this._canvas, 1, 'blue', 1, seconds * 6);
+		var secondsDial = new pascal.Dials(1, '#c1c1c1', 0.96, secondsDegrees - 90);
 		dials.push(secondsDial);
 	}
 
+	// console.log(this);
+
 	
-	drawAndUpdate(dials, this);
+	drawAndUpdate();
 
 }
 
-
-
-
 // constructor
-pascal.Dials = function(canvas, strokeWidth, color, length, circleDegree) {
-	this._canvas = canvas;
+pascal.Dials = function(strokeWidth, color, length, circleDegree) {
 	this._strokeWidth = strokeWidth;
 	this._length = length;
 	this._color = color;
@@ -110,28 +122,22 @@ pascal.Dials = function(canvas, strokeWidth, color, length, circleDegree) {
 }
 
 pascal.Dials.prototype._update = function() {
-	var canvas = this._canvas;
-	var context = canvas.getContext('2d');
-
-	var canvasWidth = canvas.width;
-	var canvasHeight = canvas.height;
+	var canvasWidth = mainCanvas.width;
+	var canvasHeight = mainCanvas.height;
 	var lineLength = canvasWidth / 2 * this._length;
 	var circleDegree = this._circleDegree;
+	var centerPointOffset = canvasWidth / 2;
 
-	// OK DIT GAAT NOG VOLLEDIG FOUT xD
+	circleDegree = convertToRadians(circleDegree);
 
-	var xAxis = Math.cos(lineLength) * circleDegree + canvasWidth;
-	var Yaxis = Math.sin(lineLength) * circleDegree + canvasHeight;
+	var xAxis = (Math.cos(circleDegree) * lineLength) + centerPointOffset;
+	var Yaxis = (Math.sin(circleDegree) * lineLength) + centerPointOffset;
 
-	console.log(xAxis);
-
-	console.log(Yaxis);
-
-	context.beginPath();
-	context.moveTo(canvasWidth/2, canvasHeight/2);
-	context.lineTo(xAxis, Yaxis);	
-	context.lineWidth = this._strokeWidth;
-	context.strokeStyle = this._color;
-	context.stroke();
-	context.closePath();
+	mainContext.beginPath();
+	mainContext.moveTo(canvasWidth/2, canvasHeight/2);
+	mainContext.lineTo(xAxis, Yaxis);	
+	mainContext.lineWidth = this._strokeWidth;
+	mainContext.strokeStyle = this._color;
+	mainContext.stroke();
+	mainContext.closePath();
 }
