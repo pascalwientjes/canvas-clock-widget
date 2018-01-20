@@ -30,6 +30,25 @@ pascal.Clock.prototype = Object.create(pascal.Widget.prototype);
 pascal.Clock.prototype.constructor = pascal.Clock;
 
 function drawRomanNumeral(iii, vi, ix, xii) {
+	mainContext.font = 'normal 34px Calibri';
+	mainContext.fillStyle = '#c1c1c1';
+
+
+	if (iii = true) {
+		mainContext.fillText('III', (mainCanvas.width * 0.96) - 22, (mainCanvas.height / 2) + 11);
+	}
+
+	if (vi = true) {
+		mainContext.fillText('VI', (mainCanvas.width / 2) - 13, mainCanvas.height * 0.96);
+	}
+
+	if (ix = true) {
+		mainContext.fillText('IX', (mainCanvas.width * 0.04), (mainCanvas.height / 2) + 11);
+	}
+
+	if (xii = true) {
+		mainContext.fillText('XII', (mainCanvas.width / 2) - 17, mainCanvas.height * 0.1);
+	}
 
 }
 
@@ -98,7 +117,7 @@ function drawClock() {
 	mainContext.strokeStyle = '#dedede';
 	mainContext.stroke();
 
-	drawTimeIndicators(12, false)
+	drawTimeIndicators(12, 4)
 
 }
 
