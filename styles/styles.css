@@ -12,6 +12,95 @@
 	border-bottom: 1px solid #dedede;
 	text-align: left;
 	line-height: 50px;
+	margin-bottom: 0;
 	color: #c1c1c1;
 	font-family: 'Calibri', 'Ubuntu', 'Helvetica', sans-serif;
+}
+
+.clock-controls table {
+	width: 100%;
+	font-family: 'Calibri', 'Ubuntu', 'Helvetica', sans-serif;
+	font-size: 13px;
+	margin: 0;
+	padding: 0;
+}
+
+.clock-controls table td {
+	border-bottom: 1px solid #dedede;
+	padding-bottom: 10px;
+	padding-top: 10px;
+}
+
+.clock-controls table .left-col {
+	width: 60%;
+}
+
+.clock-controls select{
+	height: 26px;
+}
+
+input[type="checkbox"].switch {
+    position: absolute;
+    margin: 8px 0 0 16px;    
+}
+input[type="checkbox"].switch + label {
+	cursor: pointer;
+    position: relative;
+    padding: 5px 0 0 50px;
+    line-height: 2.0em;
+}
+input[type="checkbox"].switch + label:before {
+    content: "";
+    position: absolute;
+    display: block;
+    left: 0;
+    top: 0;
+    width: 40px; /* x*5 */
+    height: 24px; /* x*3 */
+    border-radius: 16px; /* x*2 */
+    background: #fff;
+    border: 1px solid #d9d9d9;
+    -webkit-transition: all 0.3s;
+    transition: all 0.3s;
+}
+input[type="checkbox"].switch + label:after {
+    content: "";
+    position: absolute;
+    display: block;
+    left: 0px;
+    top: 0px;
+    width: 24px; /* x*3 */
+    height: 24px; /* x*3 */
+    border-radius: 16px; /* x*2 */
+    background: #fff;
+    border: 1px solid #d9d9d9;
+    -webkit-transition: all 0.3s;
+    transition: all 0.3s;
+}
+input[type="checkbox"].switch + label:hover:after {
+    box-shadow: 0 0 5px rgba(0,0,0,0.3);
+}
+input[type="checkbox"].switch:checked + label:after {
+    margin-left: 16px;
+}
+input[type="checkbox"].switch:checked + label:before {
+    background: #55D069;
+}
+
+.tooltip {
+	position: relative;
+}
+.tooltip:hover:before {
+	content: attr(data-tooltip);
+    display: inline-block;
+    background: #fff;
+    border: 1px solid #c1c1c1;
+    position: absolute;
+    left: 50%;
+    box-sizing: border-box;
+    width: 200px;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    padding: 10px;
+    top: -250%;
 }

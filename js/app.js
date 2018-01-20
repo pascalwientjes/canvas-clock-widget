@@ -7,15 +7,34 @@ var dials = [];
 var mainCanvas;
 var mainContext;
 
+
+// Controls variabelen
+var showAllDials = true;
+var timeIndicators = true;
+var minutesIndicators = true;
+var romanNumerals = 1;
+var romanIII = false
+var romanVI = false;
+var romanIX = false;
+var romanXII = true;
+var automaatSimulation = false;
+
 //constructor
-pascal.Widget = function(width, height, canvasId) {
+pascal.Widget = function(width, height, canvasId, controls) {
 	this._width = width;
 	this._height = height;
 	this._canvasId = canvasId;
+	this._controls = controls;
 }
 
 pascal.Widget.prototype.getHtml = function() {
-	var widgetStyling = 'position: relative; left: 50%; top: 50%; margin-left: -' + ((this._width / 2) + 200) + 'px; margin-top: -' + this._height / 2 + 'px;';
+	if (this._controls) {
+		var controlsOffset = 200;
+	} else {
+		var controlsOffset = 0;
+	}
+
+	var widgetStyling = 'position: relative; left: 50%; top: 50%; margin-left: -' + ((this._width / 2) + controlsOffset) + 'px; margin-top: -' + this._height / 2 + 'px;';
 
 	return "<canvas style='" + widgetStyling + "' id='" + this._canvasId + "' width='" + this._width + "' height='" + this._height + "' class='widget'></canvas>";
 }
@@ -24,80 +43,106 @@ pascal.Widget.prototype.getHtml = function() {
 
 // constructor
 pascal.Clock = function(width, height, canvasId, controls) {
-	pascal.Widget.call(this, width, height, canvasId);
-	this._controls = controls;
+	pascal.Widget.call(this, width, height, canvasId, controls);
+	
 }
 
 //overervings relatie 
 pascal.Clock.prototype = Object.create(pascal.Widget.prototype);
 pascal.Clock.prototype.constructor = pascal.Clock;
 
-function drawRomanNumeral(iii, vi, ix, xii) {
+function drawRomanNumeral() {
 	mainContext.font = 'normal 34px Calibri';
 	mainContext.fillStyle = '#c1c1c1';
 
-
-	if (iii = true) {
+	if (romanIII === true) {
 		mainContext.fillText('III', (mainCanvas.width * 0.96) - 22, (mainCanvas.height / 2) + 11);
 	}
 
-	if (vi = true) {
+	if (romanVI === true) {
 		mainContext.fillText('VI', (mainCanvas.width / 2) - 13, mainCanvas.height * 0.96);
 	}
 
-	if (ix = true) {
+	if (romanIX === true) {
 		mainContext.fillText('IX', (mainCanvas.width * 0.04), (mainCanvas.height / 2) + 11);
 	}
 
-	if (xii = true) {
+	if (romanXII === true) {
 		mainContext.fillText('XII', (mainCanvas.width / 2) - 17, mainCanvas.height * 0.1);
 	}
 
 }
 
-function drawTimeIndicators(indicatorAmount, romanNumerals) {
+function drawTimeIndicators(indicatorAmount) {
 	var centerPointOffset = mainCanvas.width / 2;
 	var innerLineLength = mainCanvas.width / 2 * 0.85;
 	var outerLineLength = mainCanvas.width / 2 * 0.99;
+	var smallInnerLineLength = mainCanvas.width / 2 * 0.9;
+	var smallOuterLineLength = mainCanvas.width / 2 * 0.99;
+	var reservedIndicators = [15,30,45,60]
 
 	if (romanNumerals === 1) {
 		var skipTimeIndicator = [12];
-		drawRomanNumeral(false, false, false, true);
 
 	} else if (romanNumerals === 2) {
 		var skipTimeIndicator = [6, 12];
-		drawRomanNumeral(false, true, false, true);
 
 	} else if (romanNumerals === 4) {
 		var skipTimeIndicator = [3, 6, 9, 12];
-		drawRomanNumeral(true, true, false, true);
 	} else {
-		var skipTimeIndicator = [];
-		drawRomanNumeral(false, false, false, false);		
+		var skipTimeIndicator = [];		
 	}
 
-	for (var i = 1; i <= indicatorAmount; i++) {
+	if (timeIndicators == true) {
+		for (var i = 1; i <= indicatorAmount; i++) {
 
-		if (skipTimeIndicator.includes(i)) {
-			continue;
+			if (skipTimeIndicator.includes(i)) {
+				continue;
+			}
+
+			var degreesOnCircle = convertToRadians((i * 30) - 90);
+
+			var innerX = (Math.cos(degreesOnCircle) * innerLineLength) + centerPointOffset;
+			var innerY = (Math.sin(degreesOnCircle) * innerLineLength) + centerPointOffset;
+			var outerX = (Math.cos(degreesOnCircle) * outerLineLength) + centerPointOffset;
+			var outerY = (Math.sin(degreesOnCircle) * outerLineLength) + centerPointOffset;
+
+			mainContext.beginPath();
+			mainContext.moveTo(innerX, innerY);
+			mainContext.lineTo(outerX, outerY);	
+			mainContext.lineWidth = 2;
+			mainContext.strokeStyle = '#dedede';
+			mainContext.stroke();
+			mainContext.closePath();
+
 		}
-
-		var degreesOnCircle = convertToRadians((i * 30) - 90);
-
-		var innerX = (Math.cos(degreesOnCircle) * innerLineLength) + centerPointOffset;
-		var innerY = (Math.sin(degreesOnCircle) * innerLineLength) + centerPointOffset;
-		var outerX = (Math.cos(degreesOnCircle) * outerLineLength) + centerPointOffset;
-		var outerY = (Math.sin(degreesOnCircle) * outerLineLength) + centerPointOffset;
-
-		mainContext.beginPath();
-		mainContext.moveTo(innerX, innerY);
-		mainContext.lineTo(outerX, outerY);	
-		mainContext.lineWidth = 2;
-		mainContext.strokeStyle = '#dedede';
-		mainContext.stroke();
-		mainContext.closePath();
-
 	}
+
+	if (minutesIndicators == true) {
+		for (var i = 1; i <= 60; i++) {
+
+			if (reservedIndicators.includes(i)) {
+				continue;
+			}
+
+			var degreesOnCircle = convertToRadians((i * 6) - 90);
+
+			var innerX = (Math.cos(degreesOnCircle) * smallInnerLineLength) + centerPointOffset;
+			var innerY = (Math.sin(degreesOnCircle) * smallInnerLineLength) + centerPointOffset;
+			var outerX = (Math.cos(degreesOnCircle) * smallOuterLineLength) + centerPointOffset;
+			var outerY = (Math.sin(degreesOnCircle) * smallOuterLineLength) + centerPointOffset;
+
+			mainContext.beginPath();
+			mainContext.moveTo(innerX, innerY);
+			mainContext.lineTo(outerX, outerY);	
+			mainContext.lineWidth = 1;
+			mainContext.strokeStyle = '#dedede';
+			mainContext.stroke();
+			mainContext.closePath();
+		}
+	}
+
+	drawRomanNumeral();
 }
 
 // clock methods
@@ -122,6 +167,13 @@ function drawClock() {
 
 	drawTimeIndicators(12, 4)
 
+}
+
+function camelize(str) {
+  return str.replace(/(?:^\w|[A-Z]|\b\w|\s+)/g, function(match, index) {
+    if (+match === 0) return ""; // or if (/\s+/.test(match)) for white spaces
+    return index == 0 ? match.toLowerCase() : match.toUpperCase();
+  });
 }
 
 function convertToRadians(degrees) {
@@ -149,14 +201,16 @@ function drawAndUpdate() {
 }
 
 
-pascal.Clock.prototype.init = function(allDials) {
+pascal.Clock.prototype.init = function() {
 	document.getElementsByTagName("BODY")[0].style.height = "100%";
+	document.getElementsByTagName("BODY")[0].style.margin = "0";
 	document.getElementsByTagName("HTML")[0].style.height = "100%";
 
 	document.write(this.getHtml());
 
 	if (this._controls) {
-		document.write(this.getControlsHtml())
+		document.write(this.getControlsHtml());
+		this.addControlEvents();
 	}
 
 	mainCanvas = document.getElementById(this._canvasId);
@@ -168,10 +222,9 @@ pascal.Clock.prototype.init = function(allDials) {
 	var minutesDial = new pascal.Dials(2, '#c1c1c1', 0.9, 'minutes');
 	dials.push(minutesDial);
 
-	if (allDials == 'all') {
-		var secondsDial = new pascal.Dials(1, '#c1c1c1', 0.96, 'seconds');
-		dials.push(secondsDial);
-	}
+	var secondsDial = new pascal.Dials(1, '#c1c1c1', 0.96, 'seconds');
+	dials.push(secondsDial);
+
 	
 	drawAndUpdate();
 
@@ -181,17 +234,116 @@ pascal.Clock.prototype.getControlsHtml = function() {
 	var controlsStyling = 'style="position: absolute; top: 0px; right: 0px; height: 100%" ';
 
 	var html = '<div ' + controlsStyling + 'class="clock-controls" id="clockControls">';
-	html+= '<h3>Opties</h3>';
-	html+= this.addControlOptionHtml('Roman numerals', 'switch');
-	html+= '</div>';
+	html += '<h3>Opties</h3>';
+	html += '<table class="options-container"><tbody>';
+	html += this.addControlOptionHtml('Automaat simulatie', 'switch','Met deze optie simuleer je een mechanisch horloge');
+	html += this.addControlOptionHtml('Verstop secondenwijzer', 'switch','Deze optie lijkt me nogal voor zich te spreken ヽ(ヅ)ノ');
+	html += this.addControlOptionHtml('Romeinse cijfers', 'dropdown-numerals','Kies hier hoeveel roman numerals de klok moet hebben');
+	html += this.addControlOptionHtml('Tijds indicatoren', 'dropdown-timestamps','Kies hier of je minuten of 5 minuten indicatoren wilt');
+	html += '</table></tbody>';
+	html += '</div>';
 
 	return html;
 }
 
-pascal.Clock.prototype.addControlOptionHtml = function(optionName, type) {
-	return 'test';
+pascal.Clock.prototype.addControlOptionHtml = function(optionName, type, tooltipText) {
+	var optionCamelCase = camelize(optionName);
+
+	var optionHtml = '<tr>';
+	optionHtml += '<td class="left-col"><span class="tooltip" data-tooltip="' + tooltipText + '">' + optionName + '</span></td><td>';
+
+	switch (type) {
+		case 'switch':
+			optionHtml += '<input type="checkbox" class="switch" name="' + optionCamelCase + '" id="' + optionCamelCase + '"><label for="' + optionCamelCase + '"></label>';
+			break;
+
+		case 'dropdown-numerals':
+			optionHtml += '<select id="' + optionCamelCase + '">';
+			optionHtml += '<option value="0">Geen Romeinse cijfers</option>';
+			optionHtml += '<option value="1" selected>Alleen de 12</option>';
+			optionHtml += '<option value="2">De 12 en 6</option>';
+			optionHtml += '<option value="4">De 3, 6, 9 en 12</option>';
+			optionHtml += '</select>';
+			break;
+
+		case 'dropdown-timestamps':
+			optionHtml += '<select id="' + optionCamelCase + '">';
+			optionHtml += '<option value="0">Kale wijzerplaat</option>';
+			optionHtml += '<option value="1">5 minuten indicatoren</option>';
+			optionHtml += '<option value="2" selected>1 minuut indicatoren</option>';
+			optionHtml += '</select>';
+			break;
+	} 
+
+	optionHtml += '</td></tr>';
+
+	return optionHtml;
 }
 
+pascal.Clock.prototype.addControlEvents = function() {
+	document.getElementById('verstopSecondenwijzer').addEventListener('click', function() {
+		if (this.checked) {
+			showAllDials = false;
+		} else {
+			showAllDials = true;
+		}
+	});
+
+	document.getElementById('automaatSimulatie').addEventListener('click', function() {
+		if (this.checked) {
+			automaatSimulation = true;
+		} else {
+			automaatSimulation = false;
+		}
+	});
+
+	document.getElementById('romeinseCijfers').addEventListener('change', function() {
+		if (this.value == 0) {
+			romanNumerals = 0;
+			romanIII = false
+			romanVI = false;
+			romanIX = false;
+			romanXII = false;
+
+		} else if (this.value == 1) {
+			romanNumerals = 1;
+			romanIII = false
+			romanVI = false;
+			romanIX = false;
+			romanXII = true;
+
+		} else if (this.value == 2) {
+			romanNumerals = 2;
+			romanIII = false
+			romanVI = true;
+			romanIX = false;
+			romanXII = true;
+
+		} else if (this.value == 4) {
+			romanNumerals = 4;
+			romanIII = true
+			romanVI = true;
+			romanIX = true;
+			romanXII = true;
+		}
+	});
+
+	document.getElementById('tijdsIndicatoren').addEventListener('change', function() {
+		if (this.value == 0) {
+			timeIndicators = false;
+			minutesIndicators = false;
+
+		} else if (this.value == 1) {
+			timeIndicators = true;
+			minutesIndicators = false;
+
+		} else if (this.value == 2) {
+			timeIndicators = true;
+			minutesIndicators = true;
+
+		}
+	});
+}
 
 // constructor
 pascal.Dials = function(strokeWidth, color, length, dialtype) {
@@ -217,11 +369,24 @@ pascal.Dials.prototype._update = function() {
 		var circleDegree = hourDegrees - 90;
 
 	} else if (dialType == 'minutes') {
-		var minutesDegrees = date.getMinutes() * 6;
+		if (automaatSimulation) {
+			var minutesDegrees = 0.1 * (60 * date.getMinutes() + date.getSeconds());
+		} else {
+			var minutesDegrees = date.getMinutes() * 6;
+		}
+		
 		var circleDegree = minutesDegrees - 90;
 	
 	} else if (dialType == 'seconds') {
-		var secondsDegrees = date.getSeconds() * 6;
+		if (!showAllDials) {
+			return;
+		}
+		if (automaatSimulation) {
+			var secondsDegrees = 0.006 * (1000 * date.getSeconds() + date.getMilliseconds());
+		} else {
+			var secondsDegrees = date.getSeconds() * 6;
+		}
+		
 		var circleDegree = secondsDegrees - 90;
 	}
 
