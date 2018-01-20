@@ -1,0 +1,17 @@
+.clock-controls {
+	background: #f3f3f3;
+	border: 1px solid #dedede;
+	border-width: 0 0 0 1px;
+	width: 400px;
+	box-sizing: border-box;
+	padding: 20px;
+}
+.clock-controls h3 {
+	width: 100%;
+	font-size: 24px;
+	border-bottom: 1px solid #dedede;
+	text-align: left;
+	line-height: 50px;
+	color: #c1c1c1;
+	font-family: 'Calibri', 'Ubuntu', 'Helvetica', sans-serif;
+}

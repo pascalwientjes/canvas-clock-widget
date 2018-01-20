@@ -15,14 +15,17 @@ pascal.Widget = function(width, height, canvasId) {
 }
 
 pascal.Widget.prototype.getHtml = function() {
-	return "<canvas id='" + this._canvasId + "' width='" + this._width + "' height='" + this._height + "' class='widget'></canvas>";
+	var widgetStyling = 'position: relative; left: 50%; top: 50%; margin-left: -' + ((this._width / 2) + 200) + 'px; margin-top: -' + this._height / 2 + 'px;';
+
+	return "<canvas style='" + widgetStyling + "' id='" + this._canvasId + "' width='" + this._width + "' height='" + this._height + "' class='widget'></canvas>";
 }
 
 
 
 // constructor
-pascal.Clock = function(width, height, canvasId) {
+pascal.Clock = function(width, height, canvasId, controls) {
 	pascal.Widget.call(this, width, height, canvasId);
+	this._controls = controls;
 }
 
 //overervings relatie 
@@ -147,7 +150,15 @@ function drawAndUpdate() {
 
 
 pascal.Clock.prototype.init = function(allDials) {
+	document.getElementsByTagName("BODY")[0].style.height = "100%";
+	document.getElementsByTagName("HTML")[0].style.height = "100%";
+
 	document.write(this.getHtml());
+
+	if (this._controls) {
+		document.write(this.getControlsHtml())
+	}
+
 	mainCanvas = document.getElementById(this._canvasId);
 	mainContext = mainCanvas.getContext('2d');
 
@@ -165,6 +176,22 @@ pascal.Clock.prototype.init = function(allDials) {
 	drawAndUpdate();
 
 }
+
+pascal.Clock.prototype.getControlsHtml = function() {
+	var controlsStyling = 'style="position: absolute; top: 0px; right: 0px; height: 100%" ';
+
+	var html = '<div ' + controlsStyling + 'class="clock-controls" id="clockControls">';
+	html+= '<h3>Opties</h3>';
+	html+= this.addControlOptionHtml('Roman numerals', 'switch');
+	html+= '</div>';
+
+	return html;
+}
+
+pascal.Clock.prototype.addControlOptionHtml = function(optionName, type) {
+	return 'test';
+}
+
 
 // constructor
 pascal.Dials = function(strokeWidth, color, length, dialtype) {
