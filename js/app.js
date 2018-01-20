@@ -29,22 +29,37 @@ pascal.Clock = function(width, height, canvasId) {
 pascal.Clock.prototype = Object.create(pascal.Widget.prototype);
 pascal.Clock.prototype.constructor = pascal.Clock;
 
+function drawRomanNumeral(iii, vi, ix, xii) {
+
+}
+
 function drawTimeIndicators(indicatorAmount, romanNumerals) {
 	var centerPointOffset = mainCanvas.width / 2;
 	var innerLineLength = mainCanvas.width / 2 * 0.85;
 	var outerLineLength = mainCanvas.width / 2 * 0.99;
 
 	if (romanNumerals === 1) {
+		var skipTimeIndicator = [12];
+		drawRomanNumeral(false, false, false, true);
 
 	} else if (romanNumerals === 2) {
+		var skipTimeIndicator = [6, 12];
+		drawRomanNumeral(false, true, false, true);
 
 	} else if (romanNumerals === 4) {
-
+		var skipTimeIndicator = [3, 6, 9, 12];
+		drawRomanNumeral(true, true, false, true);
 	} else {
-		
+		var skipTimeIndicator = [];
+		drawRomanNumeral(false, false, false, false);		
 	}
 
 	for (var i = 1; i <= indicatorAmount; i++) {
+
+		if (skipTimeIndicator.includes(i)) {
+			continue;
+		}
+
 		var degreesOnCircle = convertToRadians((i * 30) - 90);
 
 		var innerX = (Math.cos(degreesOnCircle) * innerLineLength) + centerPointOffset;
@@ -83,7 +98,7 @@ function drawClock() {
 	mainContext.strokeStyle = '#dedede';
 	mainContext.stroke();
 
-	drawTimeIndicators(12, 1)
+	drawTimeIndicators(12, false)
 
 }
 
