@@ -29,6 +29,39 @@ pascal.Clock = function(width, height, canvasId) {
 pascal.Clock.prototype = Object.create(pascal.Widget.prototype);
 pascal.Clock.prototype.constructor = pascal.Clock;
 
+function drawTimeIndicators(indicatorAmount, romanNumerals) {
+	var centerPointOffset = mainCanvas.width / 2;
+	var innerLineLength = mainCanvas.width / 2 * 0.85;
+	var outerLineLength = mainCanvas.width / 2 * 0.99;
+
+	if (romanNumerals === 1) {
+
+	} else if (romanNumerals === 2) {
+
+	} else if (romanNumerals === 4) {
+
+	} else {
+		
+	}
+
+	for (var i = 1; i <= indicatorAmount; i++) {
+		var degreesOnCircle = convertToRadians((i * 30) - 90);
+
+		var innerX = (Math.cos(degreesOnCircle) * innerLineLength) + centerPointOffset;
+		var innerY = (Math.sin(degreesOnCircle) * innerLineLength) + centerPointOffset;
+		var outerX = (Math.cos(degreesOnCircle) * outerLineLength) + centerPointOffset;
+		var outerY = (Math.sin(degreesOnCircle) * outerLineLength) + centerPointOffset;
+
+		mainContext.beginPath();
+		mainContext.moveTo(innerX, innerY);
+		mainContext.lineTo(outerX, outerY);	
+		mainContext.lineWidth = 2;
+		mainContext.strokeStyle = '#dedede';
+		mainContext.stroke();
+		mainContext.closePath();
+
+	}
+}
 
 // clock methods
 function drawClock() {	
@@ -42,7 +75,6 @@ function drawClock() {
 		radius = mainCanvas.height / 2 - 2;
 	}
 	
-
 	mainContext.beginPath();
 	mainContext.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
 	mainContext.fillStyle = '#f3f3f3'; 
@@ -50,6 +82,8 @@ function drawClock() {
 	mainContext.lineWidth = 2;
 	mainContext.strokeStyle = '#dedede';
 	mainContext.stroke();
+
+	drawTimeIndicators(12, 1)
 
 }
 
@@ -74,8 +108,6 @@ function drawAndUpdate() {
 		dial._update();
 	}
 
-	console.log('test');
-
 	requestAnimationFrame(drawAndUpdate)
 }
 
@@ -85,39 +117,27 @@ pascal.Clock.prototype.init = function(allDials) {
 	mainCanvas = document.getElementById(this._canvasId);
 	mainContext = mainCanvas.getContext('2d');
 
-	var date = new Date();
-	var hours = date.getHours() % 12 || 12;
-	var hourDegrees = 0.5 * (60 * hours + date.getMinutes());
-	console.log(hourDegrees);
-	var minutesDegrees = date.getMinutes() * 6;
-	var secondsDegrees = date.getSeconds() * 6;
-
-	
-
-	var hourDial = new pascal.Dials(3, '#c1c1c1', 0.75, hourDegrees - 90);
+	var hourDial = new pascal.Dials(3, '#c1c1c1', 0.75, 'hours');
 	dials.push(hourDial);
 
-	var minutesDial = new pascal.Dials(2, '#c1c1c1', 0.9, minutesDegrees - 90);
+	var minutesDial = new pascal.Dials(2, '#c1c1c1', 0.9, 'minutes');
 	dials.push(minutesDial);
 
 	if (allDials == 'all') {
-		var secondsDial = new pascal.Dials(1, '#c1c1c1', 0.96, secondsDegrees - 90);
+		var secondsDial = new pascal.Dials(1, '#c1c1c1', 0.96, 'seconds');
 		dials.push(secondsDial);
 	}
-
-	// console.log(this);
-
 	
 	drawAndUpdate();
 
 }
 
 // constructor
-pascal.Dials = function(strokeWidth, color, length, circleDegree) {
+pascal.Dials = function(strokeWidth, color, length, dialtype) {
 	this._strokeWidth = strokeWidth;
 	this._length = length;
 	this._color = color;
-	this._circleDegree = circleDegree;
+	this._dialtype = dialtype;
 
 }
 
@@ -125,8 +145,24 @@ pascal.Dials.prototype._update = function() {
 	var canvasWidth = mainCanvas.width;
 	var canvasHeight = mainCanvas.height;
 	var lineLength = canvasWidth / 2 * this._length;
-	var circleDegree = this._circleDegree;
+	var dialType = this._dialtype;
 	var centerPointOffset = canvasWidth / 2;
+
+	var date = new Date();
+
+	if (dialType == 'hours') {
+		var hours = date.getHours() % 12 || 12;
+		var hourDegrees = 0.5 * (60 * hours + date.getMinutes());
+		var circleDegree = hourDegrees - 90;
+
+	} else if (dialType == 'minutes') {
+		var minutesDegrees = date.getMinutes() * 6;
+		var circleDegree = minutesDegrees - 90;
+	
+	} else if (dialType == 'seconds') {
+		var secondsDegrees = date.getSeconds() * 6;
+		var circleDegree = secondsDegrees - 90;
+	}
 
 	circleDegree = convertToRadians(circleDegree);
 
