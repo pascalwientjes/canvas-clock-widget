@@ -32,11 +32,12 @@
 }
 
 .clock-controls table .left-col {
-	width: 60%;
+	width: 55%;
 }
 
 .clock-controls select{
 	height: 26px;
+	width: 100%
 }
 
 input[type="checkbox"].switch {

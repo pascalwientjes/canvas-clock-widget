@@ -12,12 +12,14 @@ var mainContext;
 var showAllDials = true;
 var timeIndicators = true;
 var minutesIndicators = true;
-var romanNumerals = 1;
+var romanNumerals = 0;
 var romanIII = false
 var romanVI = false;
 var romanIX = false;
-var romanXII = true;
+var romanXII = false;
+var addLogo = false;
 var automaatSimulation = false;
+var complicationType;
 
 //constructor
 pascal.Widget = function(width, height, canvasId, controls) {
@@ -156,10 +158,14 @@ function drawClock() {
 	} else {
 		radius = mainCanvas.height / 2 - 2;
 	}
+
+	var gradient = mainContext.createLinearGradient(0, mainCanvas.height , 0, 0);
+	gradient.addColorStop(0,"#f9f9f9");
+	gradient.addColorStop(1,"#fff");
 	
 	mainContext.beginPath();
 	mainContext.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
-	mainContext.fillStyle = '#f3f3f3'; 
+	mainContext.fillStyle = gradient; 
 	mainContext.fill();
 	mainContext.lineWidth = 2;
 	mainContext.strokeStyle = '#dedede';
@@ -167,6 +173,37 @@ function drawClock() {
 
 	drawTimeIndicators(12, 4)
 
+}
+
+function drawDate() {
+	var date = new Date();
+	var today = date.getDate();
+
+	mainContext.fillStyle = '#fff';
+	mainContext.strokeStyle = '#dedede';
+	mainContext.lineWidth = 2;
+	mainContext.fillRect(mainCanvas.width * 0.2, mainCanvas.height / 2 - 15, 45, 30);
+	mainContext.strokeRect(mainCanvas.width * 0.2, mainCanvas.height / 2 - 15, 45, 30);
+	mainContext.font = 'bold 18px Calibri';
+	mainContext.fillStyle = '#c1c1c1';
+	mainContext.fillText(today, mainCanvas.width * 0.2 + 12, mainCanvas.height / 2 + 4.5);
+
+}
+
+function drawComplications() {
+	if (complicationType === 'date') {
+		drawDate();
+	} else if (complicationType === 'moonphase') {
+		// TODO
+	} else if (complicationType === 'perpetual callendar') {
+		// TODO
+	} 
+}
+
+function drawLogo() {
+	image = new Image();
+	image.src = 'images/jaeger.png';
+	mainContext.drawImage(image, mainCanvas.width / 2 - image.width / 4, mainCanvas.height * 0.15, image.width / 2, image.height / 2);
 }
 
 function camelize(str) {
@@ -190,6 +227,12 @@ function drawAndUpdate() {
 	// canvas opschonen en daarna nieuwe klok tekenen
 	mainContext.clearRect(0, 0, 500, 500);
 	drawClock();
+
+	drawComplications();
+
+	if (addLogo) {
+		drawLogo();
+	}
 	
 	for (var i = 0; i < dials.length; i++) {
 
@@ -197,7 +240,7 @@ function drawAndUpdate() {
 		dial._update();
 	}
 
-	requestAnimationFrame(drawAndUpdate)
+	requestAnimationFrame(drawAndUpdate);
 }
 
 
@@ -237,9 +280,11 @@ pascal.Clock.prototype.getControlsHtml = function() {
 	html += '<h3>Opties</h3>';
 	html += '<table class="options-container"><tbody>';
 	html += this.addControlOptionHtml('Automaat simulatie', 'switch','Met deze optie simuleer je een mechanisch horloge');
+	html += this.addControlOptionHtml('Je ne sais quoi', 'switch','Voeg iets onbeschrijfbaar moois aan de clock toe');
 	html += this.addControlOptionHtml('Verstop secondenwijzer', 'switch','Deze optie lijkt me nogal voor zich te spreken ヽ(ヅ)ノ');
 	html += this.addControlOptionHtml('Romeinse cijfers', 'dropdown-numerals','Kies hier hoeveel roman numerals de klok moet hebben');
 	html += this.addControlOptionHtml('Tijds indicatoren', 'dropdown-timestamps','Kies hier of je minuten of 5 minuten indicatoren wilt');
+	html += this.addControlOptionHtml('Extra complicatie', 'dropdown-complications','Kies hier welke extra complicatie je wilt tonen');
 	html += '</table></tbody>';
 	html += '</div>';
 
@@ -259,8 +304,8 @@ pascal.Clock.prototype.addControlOptionHtml = function(optionName, type, tooltip
 
 		case 'dropdown-numerals':
 			optionHtml += '<select id="' + optionCamelCase + '">';
-			optionHtml += '<option value="0">Geen Romeinse cijfers</option>';
-			optionHtml += '<option value="1" selected>Alleen de 12</option>';
+			optionHtml += '<option value="0" selected>Geen Romeinse cijfers</option>';
+			optionHtml += '<option value="1">Alleen de 12</option>';
 			optionHtml += '<option value="2">De 12 en 6</option>';
 			optionHtml += '<option value="4">De 3, 6, 9 en 12</option>';
 			optionHtml += '</select>';
@@ -273,6 +318,13 @@ pascal.Clock.prototype.addControlOptionHtml = function(optionName, type, tooltip
 			optionHtml += '<option value="2" selected>1 minuut indicatoren</option>';
 			optionHtml += '</select>';
 			break;
+
+		case 'dropdown-complications':
+			optionHtml += '<select id="' + optionCamelCase + '">';
+			optionHtml += '<option value="0" selected>Geen extra complicatie</option>';
+			optionHtml += '<option value="1">Datum indicatie</option>';
+			optionHtml += '</select>';
+			break;
 	} 
 
 	optionHtml += '</td></tr>';
@@ -281,6 +333,14 @@ pascal.Clock.prototype.addControlOptionHtml = function(optionName, type, tooltip
 }
 
 pascal.Clock.prototype.addControlEvents = function() {
+	document.getElementById('jeNeSaisQuoi').addEventListener('click', function() {
+		if (this.checked) {
+			addLogo = true;
+		} else {
+			addLogo = false;
+		}
+	});
+
 	document.getElementById('verstopSecondenwijzer').addEventListener('click', function() {
 		if (this.checked) {
 			showAllDials = false;
@@ -340,6 +400,16 @@ pascal.Clock.prototype.addControlEvents = function() {
 		} else if (this.value == 2) {
 			timeIndicators = true;
 			minutesIndicators = true;
+
+		}
+	});
+
+	document.getElementById('extraComplicatie').addEventListener('change', function() {
+		if (this.value == 0) {
+			complicationType = false;
+
+		} else if (this.value == 1) {
+			complicationType = 'date';
 
 		}
 	});
