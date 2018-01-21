@@ -19,6 +19,7 @@ var romanIX = false;
 var romanXII = false;
 var addLogo = false;
 var automaatSimulation = false;
+var fancyMinuteIndicators = false;
 var complicationType;
 
 //constructor
@@ -40,7 +41,6 @@ pascal.Widget.prototype.getHtml = function() {
 
 	return "<canvas style='" + widgetStyling + "' id='" + this._canvasId + "' width='" + this._width + "' height='" + this._height + "' class='widget'></canvas>";
 }
-
 
 
 // constructor
@@ -66,7 +66,7 @@ function drawRomanNumeral() {
 	}
 
 	if (romanIX === true) {
-		mainContext.fillText('IX', (mainCanvas.width * 0.04), (mainCanvas.height / 2) + 11);
+		mainContext.fillText('IX', (mainCanvas.width * 0.025), (mainCanvas.height / 2) + 11);
 	}
 
 	if (romanXII === true) {
@@ -123,8 +123,16 @@ function drawTimeIndicators(indicatorAmount) {
 	if (minutesIndicators == true) {
 		for (var i = 1; i <= 60; i++) {
 
+			var lineWidth = 1;
+
 			if (reservedIndicators.includes(i)) {
 				continue;
+			}
+
+			if (fancyMinuteIndicators == true) {
+				var smallInnerLineLength = mainCanvas.width / 2 * 0.92;
+				var smallOuterLineLength = mainCanvas.width / 2 * 0.94;
+				var lineWidth = 1.5;
 			}
 
 			var degreesOnCircle = convertToRadians((i * 6) - 90);
@@ -137,7 +145,7 @@ function drawTimeIndicators(indicatorAmount) {
 			mainContext.beginPath();
 			mainContext.moveTo(innerX, innerY);
 			mainContext.lineTo(outerX, outerY);	
-			mainContext.lineWidth = 1;
+			mainContext.lineWidth = lineWidth;
 			mainContext.strokeStyle = '#dedede';
 			mainContext.stroke();
 			mainContext.closePath();
@@ -171,9 +179,127 @@ function drawClock() {
 	mainContext.strokeStyle = '#dedede';
 	mainContext.stroke();
 
-	drawTimeIndicators(12, 4)
+	drawTimeIndicators(12, 4);
+
+	mainContext.beginPath();
+	mainContext.arc(centerX, centerY, 4, 0, 2 * Math.PI, false);
+	mainContext.fillStyle = '#c1c1c1'; 
+	mainContext.fill();
 
 }
+
+function drawYear() {
+	var date = new Date();
+	var currentYear = date.getFullYear();
+
+	mainContext.fillStyle = '#fff';
+	mainContext.strokeStyle = '#dedede';
+	mainContext.lineWidth = 1.5;
+	mainContext.fillRect(mainCanvas.width * 0.18, mainCanvas.height * 0.7, 46, 24);
+	mainContext.strokeRect(mainCanvas.width * 0.18, mainCanvas.height * 0.7, 46, 24);
+	mainContext.font = 'normal 16px Calibri';
+	mainContext.fillStyle = '#c1c1c1';
+	mainContext.fillText(currentYear, mainCanvas.width * 0.18 + 12 - 6, mainCanvas.height * 0.7 + 17);
+}
+
+function drawMiniDial(centerX, centerY, degrees) {
+	var lineLength = mainCanvas.width / 7 * 0.6;
+
+	var degrees = degrees ;
+	var circleDegree = degrees;
+
+	circleDegree = convertToRadians(circleDegree - 90);
+
+	var xAxis = (Math.cos(circleDegree) * lineLength) + centerX;
+	var Yaxis = (Math.sin(circleDegree) * lineLength) + centerY;
+
+	mainContext.beginPath();
+	mainContext.moveTo(centerX, centerY);
+	mainContext.lineTo(xAxis, Yaxis);	
+	mainContext.lineWidth = 1.5;
+	mainContext.strokeStyle = '#c1c1c1';
+	mainContext.stroke();
+	mainContext.closePath();
+
+	mainContext.beginPath();
+	mainContext.arc(centerX, centerY, 3, 0, 2 * Math.PI, false);
+	mainContext.fillStyle = '#c1c1c1';
+	mainContext.fill();
+}
+
+
+
+function drawCalendarAreas() {
+	var xLocation = [mainCanvas.width / 2 * 0.5, mainCanvas.width  * 0.75, mainCanvas.width / 2];
+	var yLocation = [mainCanvas.height / 2, mainCanvas.height / 2, mainCanvas.height * 0.75];
+
+	for (var i = 0; i < 3; i++) {
+		mainContext.beginPath();
+		mainContext.arc(xLocation[i], yLocation[i], mainCanvas.width / 7, 0, 2 * Math.PI, false);
+		mainContext.fillStyle = '#fff';
+		mainContext.fill();
+		mainContext.lineWidth = 1.5;
+		mainContext.strokeStyle = '#dedede';
+		mainContext.stroke();
+
+	}
+	mainContext.font = 'normal 14px Calibri';
+	drawTextAlongArc('- OCT - DEC - FEB', mainCanvas.width / 2, mainCanvas.height * 0.75, mainCanvas.width / 10.5, Math.PI / 24, 'months', 1);
+	drawTextAlongArc('AUG - JUN  - APR -', mainCanvas.width / 2, mainCanvas.height * 0.75, mainCanvas.width / 10.5, Math.PI / 24, 'months');
+
+	drawTextAlongArc(' SAT SUN MON', mainCanvas.width / 2 * 0.5, mainCanvas.height / 2, mainCanvas.width / 10.5, Math.PI / 50, 'months', 1);
+	drawTextAlongArc('FRI THU WED TUE', mainCanvas.width / 2 * 0.5, mainCanvas.height / 2, mainCanvas.width / 10.5, Math.PI / 40, 'dayNames');
+
+	drawTextAlongArc('25 27 29 31 1 3 5 7',mainCanvas.width  * 0.75, mainCanvas.height / 2, mainCanvas.width / 10.5, Math.PI / 20, 'days', 1);
+	drawTextAlongArc('23 21 19 17 15 13 11 9', mainCanvas.width  * 0.75, mainCanvas.height / 2, mainCanvas.width / 10.5, Math.PI / 60, 'daysBottom');
+
+	var date = new Date();
+	drawMiniDial(mainCanvas.width / 2, mainCanvas.height * 0.75, (date.getMonth() + 1) * 30);
+	drawMiniDial(mainCanvas.width / 2 * 0.5, mainCanvas.height / 2, date.getDay() * 51.42857142857143);
+	drawMiniDial(mainCanvas.width  * 0.75, mainCanvas.height / 2, date.getDate() * 11.61290322580645);
+
+	drawYear();
+}
+
+// cool function found at http://jsfiddle.net/Brfp3/3/
+function drawTextAlongArc(text, x, y, radius, space, calendarType, top){
+   space = space || 0;
+   var numRadsPerLetter = (Math.PI - space * 2) / text.length;
+
+   mainContext.save();
+   mainContext.translate(x,y);
+
+   if (calendarType == 'months') {
+   	var offset = 0.19;
+   } else if(calendarType == 'days') {
+   	var offset = 0.11;
+   } else if(calendarType == 'daysBottom') {
+   	var offset = 0.09;
+   } else {
+   	var offset = 0;
+   }
+
+   var k = (top) ? 1 : -1; 
+   mainContext.rotate(-k * ((Math.PI - numRadsPerLetter) / 2 - space));
+
+	for(var i=0;i<text.length;i++){
+		mainContext.save();
+		mainContext.rotate((k*i*(numRadsPerLetter)) - offset);
+		mainContext.textAlign = "center";
+		mainContext.textBaseline = (!top) ? "top" : "bottom";
+		mainContext.fillStyle = '#c1c1c1';
+		mainContext.fillText(text[i],0,-k*(radius));
+		
+		mainContext.restore();
+	}
+
+   mainContext.restore();
+}
+
+function drawAnnualCalendar() {
+	drawCalendarAreas();
+}
+
 
 function drawDate() {
 	var date = new Date();
@@ -195,8 +321,9 @@ function drawComplications() {
 		drawDate();
 	} else if (complicationType === 'moonphase') {
 		// TODO
-	} else if (complicationType === 'perpetual callendar') {
-		// TODO
+		// Need to think of a way to actually calculate the phase of the moon
+	} else if (complicationType === 'annual calendar') {
+		drawAnnualCalendar();
 	} 
 }
 
@@ -284,6 +411,7 @@ pascal.Clock.prototype.getControlsHtml = function() {
 	html += this.addControlOptionHtml('Verstop secondenwijzer', 'switch','Deze optie lijkt me nogal voor zich te spreken ヽ(ヅ)ノ');
 	html += this.addControlOptionHtml('Romeinse cijfers', 'dropdown-numerals','Kies hier hoeveel roman numerals de klok moet hebben');
 	html += this.addControlOptionHtml('Tijds indicatoren', 'dropdown-timestamps','Kies hier of je minuten of 5 minuten indicatoren wilt');
+	html += this.addControlOptionHtml('Elegante minuut aanduiding', 'switch','Als je minuut aanduiding aan hebt staan kun je ze hiermee eleganter maken');
 	html += this.addControlOptionHtml('Extra complicatie', 'dropdown-complications','Kies hier welke extra complicatie je wilt tonen');
 	html += '</table></tbody>';
 	html += '</div>';
@@ -323,6 +451,7 @@ pascal.Clock.prototype.addControlOptionHtml = function(optionName, type, tooltip
 			optionHtml += '<select id="' + optionCamelCase + '">';
 			optionHtml += '<option value="0" selected>Geen extra complicatie</option>';
 			optionHtml += '<option value="1">Datum indicatie</option>';
+			optionHtml += '<option value="2">Perpetual annual calendar</option>';
 			optionHtml += '</select>';
 			break;
 	} 
@@ -340,6 +469,15 @@ pascal.Clock.prototype.addControlEvents = function() {
 			addLogo = false;
 		}
 	});
+
+	document.getElementById('eleganteMinuutAanduiding').addEventListener('click', function() {
+		if (this.checked) {
+			fancyMinuteIndicators = true;
+		} else {
+			fancyMinuteIndicators = false;
+		}
+	});
+
 
 	document.getElementById('verstopSecondenwijzer').addEventListener('click', function() {
 		if (this.checked) {
@@ -411,6 +549,9 @@ pascal.Clock.prototype.addControlEvents = function() {
 		} else if (this.value == 1) {
 			complicationType = 'date';
 
+		} else if (this.value == 2) {
+			complicationType = 'annual calendar';
+
 		}
 	});
 }
@@ -458,6 +599,7 @@ pascal.Dials.prototype._update = function() {
 		}
 		
 		var circleDegree = secondsDegrees - 90;
+		var circleDegreeOposit = secondsDegrees + 90;
 	}
 
 	circleDegree = convertToRadians(circleDegree);
@@ -472,4 +614,19 @@ pascal.Dials.prototype._update = function() {
 	mainContext.strokeStyle = this._color;
 	mainContext.stroke();
 	mainContext.closePath();
+
+	if (dialType == 'seconds') {
+		circleDegree = convertToRadians(circleDegreeOposit);
+
+		var xAxis = (Math.cos(circleDegree) * (lineLength * 0.07)) + centerPointOffset;
+		var Yaxis = (Math.sin(circleDegree) * (lineLength * 0.07)) + centerPointOffset;
+
+		mainContext.beginPath();
+		mainContext.moveTo(canvasWidth/2, canvasHeight/2);
+		mainContext.lineTo(xAxis, Yaxis);	
+		mainContext.lineWidth = this._strokeWidth;
+		mainContext.strokeStyle = this._color;
+		mainContext.stroke();
+		mainContext.closePath();
+	}
 }
