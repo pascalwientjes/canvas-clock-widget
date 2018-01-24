@@ -3,13 +3,13 @@ var pascal = pascal || {};
 
 // Global variables
 
-var dials = [];
+var hands = [];
 var mainCanvas;
 var mainContext;
 
 
 // Controls variabelen
-var showAllDials = true;
+var showAllHands = true;
 var timeIndicators = true;
 var minutesIndicators = true;
 var romanNumerals = 0;
@@ -202,7 +202,7 @@ function drawYear() {
 	mainContext.fillText(currentYear, mainCanvas.width * 0.18 + 12 - 6, mainCanvas.height * 0.7 + 17);
 }
 
-function drawMiniDial(centerX, centerY, degrees) {
+function drawMiniHand(centerX, centerY, degrees) {
 	var lineLength = mainCanvas.width / 7 * 0.6;
 
 	var degrees = degrees ;
@@ -254,9 +254,9 @@ function drawCalendarAreas() {
 	drawTextAlongArc('23 21 19 17 15 13 11 9', mainCanvas.width  * 0.75, mainCanvas.height / 2, mainCanvas.width / 10.5, Math.PI / 60, 'daysBottom');
 
 	var date = new Date();
-	drawMiniDial(mainCanvas.width / 2, mainCanvas.height * 0.75, (date.getMonth() + 1) * 30);
-	drawMiniDial(mainCanvas.width / 2 * 0.5, mainCanvas.height / 2, date.getDay() * 51.42857142857143);
-	drawMiniDial(mainCanvas.width  * 0.75, mainCanvas.height / 2, date.getDate() * 11.61290322580645);
+	drawMiniHand(mainCanvas.width / 2, mainCanvas.height * 0.75, (date.getMonth() + 1) * 30);
+	drawMiniHand(mainCanvas.width / 2 * 0.5, mainCanvas.height / 2, date.getDay() * 51.42857142857143);
+	drawMiniHand(mainCanvas.width  * 0.75, mainCanvas.height / 2, date.getDate() * 11.61290322580645);
 
 	drawYear();
 }
@@ -361,10 +361,10 @@ function drawAndUpdate() {
 		drawLogo();
 	}
 	
-	for (var i = 0; i < dials.length; i++) {
+	for (var i = 0; i < hands.length; i++) {
 
-		var dial = dials[i];
-		dial._update();
+		var hand = hands[i];
+		hand._update();
 	}
 
 	requestAnimationFrame(drawAndUpdate);
@@ -386,14 +386,14 @@ pascal.Clock.prototype.init = function() {
 	mainCanvas = document.getElementById(this._canvasId);
 	mainContext = mainCanvas.getContext('2d');
 
-	var hourDial = new pascal.Dials(3, '#c1c1c1', 0.75, 'hours');
-	dials.push(hourDial);
+	var hourHand = new pascal.Hands(3, '#c1c1c1', 0.75, 'hours');
+	hands.push(hourHand);
 
-	var minutesDial = new pascal.Dials(2, '#c1c1c1', 0.9, 'minutes');
-	dials.push(minutesDial);
+	var minutesHand = new pascal.Hands(2, '#c1c1c1', 0.9, 'minutes');
+	hands.push(minutesHand);
 
-	var secondsDial = new pascal.Dials(1, '#c1c1c1', 0.96, 'seconds');
-	dials.push(secondsDial);
+	var secondsHand = new pascal.Hands(1, '#c1c1c1', 0.96, 'seconds');
+	hands.push(secondsHand);
 
 	
 	drawAndUpdate();
@@ -481,9 +481,9 @@ pascal.Clock.prototype.addControlEvents = function() {
 
 	document.getElementById('verstopSecondenwijzer').addEventListener('click', function() {
 		if (this.checked) {
-			showAllDials = false;
+			showAllHands = false;
 		} else {
-			showAllDials = true;
+			showAllHands = true;
 		}
 	});
 
@@ -557,29 +557,29 @@ pascal.Clock.prototype.addControlEvents = function() {
 }
 
 // constructor
-pascal.Dials = function(strokeWidth, color, length, dialtype) {
+pascal.Hands = function(strokeWidth, color, length, handtype) {
 	this._strokeWidth = strokeWidth;
 	this._length = length;
 	this._color = color;
-	this._dialtype = dialtype;
+	this._handtype = handtype;
 
 }
 
-pascal.Dials.prototype._update = function() {
+pascal.Hands.prototype._update = function() {
 	var canvasWidth = mainCanvas.width;
 	var canvasHeight = mainCanvas.height;
 	var lineLength = canvasWidth / 2 * this._length;
-	var dialType = this._dialtype;
+	var handType = this._handtype;
 	var centerPointOffset = canvasWidth / 2;
 
 	var date = new Date();
 
-	if (dialType == 'hours') {
+	if (handType == 'hours') {
 		var hours = date.getHours() % 12 || 12;
 		var hourDegrees = 0.5 * (60 * hours + date.getMinutes());
 		var circleDegree = hourDegrees - 90;
 
-	} else if (dialType == 'minutes') {
+	} else if (handType == 'minutes') {
 		if (automaatSimulation) {
 			var minutesDegrees = 0.1 * (60 * date.getMinutes() + date.getSeconds());
 		} else {
@@ -588,8 +588,8 @@ pascal.Dials.prototype._update = function() {
 		
 		var circleDegree = minutesDegrees - 90;
 	
-	} else if (dialType == 'seconds') {
-		if (!showAllDials) {
+	} else if (handType == 'seconds') {
+		if (!showAllHands) {
 			return;
 		}
 		if (automaatSimulation) {
@@ -615,7 +615,7 @@ pascal.Dials.prototype._update = function() {
 	mainContext.stroke();
 	mainContext.closePath();
 
-	if (dialType == 'seconds') {
+	if (handType == 'seconds') {
 		circleDegree = convertToRadians(circleDegreeOpposite);
 
 		var xAxis = (Math.cos(circleDegree) * (lineLength * 0.07)) + centerPointOffset;
