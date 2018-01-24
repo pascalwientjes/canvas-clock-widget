@@ -406,13 +406,13 @@ pascal.Clock.prototype.getControlsHtml = function() {
 	var html = '<div ' + controlsStyling + 'class="clock-controls" id="clockControls">';
 	html += '<h3>Opties</h3>';
 	html += '<table class="options-container"><tbody>';
-	html += this.addControlOptionHtml('Automaat simulatie', 'switch','Met deze optie simuleer je een mechanisch horloge');
-	html += this.addControlOptionHtml('Je ne sais quoi', 'switch','Voeg iets onbeschrijfbaar moois aan de clock toe');
-	html += this.addControlOptionHtml('Verstop secondenwijzer', 'switch','Deze optie lijkt me nogal voor zich te spreken ヽ(ヅ)ノ');
-	html += this.addControlOptionHtml('Romeinse cijfers', 'dropdown-numerals','Kies hier hoeveel roman numerals de klok moet hebben');
-	html += this.addControlOptionHtml('Tijds indicatoren', 'dropdown-timestamps','Kies hier of je minuten of 5 minuten indicatoren wilt');
-	html += this.addControlOptionHtml('Elegante minuut aanduiding', 'switch','Als je minuut aanduiding aan hebt staan kun je ze hiermee eleganter maken');
-	html += this.addControlOptionHtml('Extra complicatie', 'dropdown-complications','Kies hier welke extra complicatie je wilt tonen');
+	html += this.addControlOptionHtml('Automaat simulatie', 'switch', 'Met deze optie simuleer je een mechanisch horloge');
+	html += this.addControlOptionHtml('Je ne sais quoi', 'switch', 'Voeg iets onbeschrijfbaar moois aan de clock toe');
+	html += this.addControlOptionHtml('Verstop secondenwijzer', 'switch', 'Deze optie lijkt me nogal voor zich te spreken ヽ(ヅ)ノ');
+	html += this.addControlOptionHtml('Romeinse cijfers', 'dropdown-numerals', 'Kies hier hoeveel roman numerals de klok moet hebben');
+	html += this.addControlOptionHtml('Tijds indicatoren', 'dropdown-timestamps', 'Kies hier of je minuten of 5 minuten indicatoren wilt');
+	html += this.addControlOptionHtml('Elegante minuut aanduiding', 'switch', 'Als je minuut aanduiding aan hebt staan kun je ze hiermee eleganter maken');
+	html += this.addControlOptionHtml('Extra complicatie', 'dropdown-complications', 'Kies hier welke extra complicatie je wilt tonen');
 	html += '</table></tbody>';
 	html += '</div>';
 
@@ -599,7 +599,7 @@ pascal.Dials.prototype._update = function() {
 		}
 		
 		var circleDegree = secondsDegrees - 90;
-		var circleDegreeOposit = secondsDegrees + 90;
+		var circleDegreeOpposite = secondsDegrees + 90;
 	}
 
 	circleDegree = convertToRadians(circleDegree);
@@ -616,7 +616,7 @@ pascal.Dials.prototype._update = function() {
 	mainContext.closePath();
 
 	if (dialType == 'seconds') {
-		circleDegree = convertToRadians(circleDegreeOposit);
+		circleDegree = convertToRadians(circleDegreeOpposite);
 
 		var xAxis = (Math.cos(circleDegree) * (lineLength * 0.07)) + centerPointOffset;
 		var Yaxis = (Math.sin(circleDegree) * (lineLength * 0.07)) + centerPointOffset;
