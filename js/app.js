@@ -21,6 +21,7 @@ var addLogo = false;
 var automaatSimulation = false;
 var fancyMinuteIndicators = false;
 var complicationType;
+var currentVph = 200; //1000 miliseconds in a second 200 = 1/5 of 1000 or the same as 2.5 Herz or 18.000 Vph 
 
 //constructor
 pascal.Widget = function(width, height, canvasId, controls) {
@@ -407,6 +408,7 @@ pascal.Clock.prototype.getControlsHtml = function() {
 	html += '<h3>Opties</h3>';
 	html += '<table class="options-container"><tbody>';
 	html += this.addControlOptionHtml('Automaat simulatie', 'switch', 'Met deze optie simuleer je een mechanisch horloge');
+	html += this.addControlOptionHtml('Automaat Snelheid', 'dropdown-vph', 'Kies het aantal Herz van de automaat' , 'automaat-simulatie');
 	html += this.addControlOptionHtml('Je ne sais quoi', 'switch', 'Voeg iets onbeschrijfbaar moois aan de clock toe');
 	html += this.addControlOptionHtml('Verstop secondenwijzer', 'switch', 'Deze optie lijkt me nogal voor zich te spreken ヽ(ヅ)ノ');
 	html += this.addControlOptionHtml('Romeinse cijfers', 'dropdown-numerals', 'Kies hier hoeveel roman numerals de klok moet hebben');
@@ -419,10 +421,15 @@ pascal.Clock.prototype.getControlsHtml = function() {
 	return html;
 }
 
-pascal.Clock.prototype.addControlOptionHtml = function(optionName, type, tooltipText) {
+pascal.Clock.prototype.addControlOptionHtml = function(optionName, type, tooltipText, dependancy) {
 	var optionCamelCase = camelize(optionName);
 
-	var optionHtml = '<tr>';
+	if (dependancy) {
+		var optionHtml = '<tr style="display:none" id="automaat-simulatie">';
+	} else {
+		var optionHtml = '<tr>';	
+	}
+	
 	optionHtml += '<td class="left-col"><span class="tooltip" data-tooltip="' + tooltipText + '">' + optionName + '</span></td><td>';
 
 	switch (type) {
@@ -452,6 +459,15 @@ pascal.Clock.prototype.addControlOptionHtml = function(optionName, type, tooltip
 			optionHtml += '<option value="0" selected>Geen extra complicatie</option>';
 			optionHtml += '<option value="1">Datum indicatie</option>';
 			optionHtml += '<option value="2">Perpetual annual calendar</option>';
+			optionHtml += '</select>';
+			break;
+
+		case 'dropdown-vph':
+			optionHtml += '<select id="' + optionCamelCase + '">';
+			optionHtml += '<option value="0" selected>18.000 vph</option>';
+			optionHtml += '<option value="1">21.600 vph</option>';
+			optionHtml += '<option value="2">28.800 vph</option>';
+			optionHtml += '<option value="3">36.000 vph</option>';
 			optionHtml += '</select>';
 			break;
 	} 
@@ -490,8 +506,10 @@ pascal.Clock.prototype.addControlEvents = function() {
 	document.getElementById('automaatSimulatie').addEventListener('click', function() {
 		if (this.checked) {
 			automaatSimulation = true;
+			document.getElementById('automaat-simulatie').style.display = 'table-row';
 		} else {
 			automaatSimulation = false;
+			document.getElementById('automaat-simulatie').style.display = 'none';
 		}
 	});
 
@@ -523,6 +541,21 @@ pascal.Clock.prototype.addControlEvents = function() {
 			romanVI = true;
 			romanIX = true;
 			romanXII = true;
+		}
+	});
+
+	document.getElementById('automaatSnelheid').addEventListener('change', function() {
+		if (this.value == 0) {
+			currentVph = 200;
+
+		} else if (this.value == 1) {
+			currentVph = 166,667;	
+
+		} else if (this.value == 2) {
+			currentVph = 125;
+
+		} else if (this.value == 3) {
+			currentVph = 100;
 		}
 	});
 
@@ -572,16 +605,17 @@ pascal.Hands.prototype._update = function() {
 	var handType = this._handtype;
 	var centerPointOffset = canvasWidth / 2;
 
-	var date = new Date();
+	var date = new Date();	
+	var currentMillisecondVph = Math.round(date.getMilliseconds() / currentVph) * currentVph;
 
 	if (handType == 'hours') {
 		var hours = date.getHours() % 12 || 12;
-		var hourDegrees = 0.5 * (60 * hours + date.getMinutes());
+		var hourDegrees = 0.5 * (60 * hours + (date.getMinutes() + date.getSeconds() / 60 + (currentMillisecondVph / 60000)));
 		var circleDegree = hourDegrees - 90;
 
 	} else if (handType == 'minutes') {
 		if (automaatSimulation) {
-			var minutesDegrees = 0.1 * (60 * date.getMinutes() + date.getSeconds());
+			var minutesDegrees = 0.1 * (60 * date.getMinutes() + (date.getSeconds() + currentMillisecondVph / 1000));
 		} else {
 			var minutesDegrees = date.getMinutes() * 6;
 		}
@@ -593,7 +627,7 @@ pascal.Hands.prototype._update = function() {
 			return;
 		}
 		if (automaatSimulation) {
-			var secondsDegrees = 0.006 * (1000 * date.getSeconds() + date.getMilliseconds());
+			var secondsDegrees = 0.006 * (1000 * date.getSeconds() + currentMillisecondVph);
 		} else {
 			var secondsDegrees = date.getSeconds() * 6;
 		}
