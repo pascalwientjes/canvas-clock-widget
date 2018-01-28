@@ -425,7 +425,7 @@ pascal.Clock.prototype.addControlOptionHtml = function(optionName, type, tooltip
 	var optionCamelCase = camelize(optionName);
 
 	if (dependancy) {
-		var optionHtml = '<tr style="display:none" id="automaat-simulatie">';
+		var optionHtml = '<tr style="display:none" id="' + dependancy + '">';
 	} else {
 		var optionHtml = '<tr>';	
 	}
