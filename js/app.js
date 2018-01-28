@@ -11,7 +11,7 @@ var mainContext;
 // Controls variabelen
 var showAllHands = true;
 var timeIndicators = true;
-var minutesIndicators = true;
+var minutesIndicators = false;
 var romanNumerals = 0;
 var romanIII = false
 var romanVI = false;
@@ -408,12 +408,12 @@ pascal.Clock.prototype.getControlsHtml = function() {
 	html += '<h3>Opties</h3>';
 	html += '<table class="options-container"><tbody>';
 	html += this.addControlOptionHtml('Automaat simulatie', 'switch', 'Met deze optie simuleer je een mechanisch horloge');
-	html += this.addControlOptionHtml('Automaat Snelheid', 'dropdown-vph', 'Kies het aantal Herz van de automaat' , 'automaat-simulatie');
+	html += this.addControlOptionHtml('Automaat Snelheid', 'dropdown-vph', 'Kies het aantal Vibraties per uur van de automaat' , 'automaat-simulatie');
 	html += this.addControlOptionHtml('Je ne sais quoi', 'switch', 'Voeg iets onbeschrijfbaar moois aan de clock toe');
 	html += this.addControlOptionHtml('Verstop secondenwijzer', 'switch', 'Deze optie lijkt me nogal voor zich te spreken ヽ(ヅ)ノ');
 	html += this.addControlOptionHtml('Romeinse cijfers', 'dropdown-numerals', 'Kies hier hoeveel roman numerals de klok moet hebben');
 	html += this.addControlOptionHtml('Tijds indicatoren', 'dropdown-timestamps', 'Kies hier of je minuten of 5 minuten indicatoren wilt');
-	html += this.addControlOptionHtml('Elegante minuut aanduiding', 'switch', 'Als je minuut aanduiding aan hebt staan kun je ze hiermee eleganter maken');
+	html += this.addControlOptionHtml('Elegante minuut aanduiding', 'switch', 'Als je minuut aanduiding aan hebt staan kun je ze hiermee eleganter maken', 'elegante-minuten');
 	html += this.addControlOptionHtml('Extra complicatie', 'dropdown-complications', 'Kies hier welke extra complicatie je wilt tonen');
 	html += '</table></tbody>';
 	html += '</div>';
@@ -449,8 +449,8 @@ pascal.Clock.prototype.addControlOptionHtml = function(optionName, type, tooltip
 		case 'dropdown-timestamps':
 			optionHtml += '<select id="' + optionCamelCase + '">';
 			optionHtml += '<option value="0">Kale wijzerplaat</option>';
-			optionHtml += '<option value="1">5 minuten indicatoren</option>';
-			optionHtml += '<option value="2" selected>1 minuut indicatoren</option>';
+			optionHtml += '<option value="1" selected>5 minuten indicatoren</option>';
+			optionHtml += '<option value="2">1 minuut indicatoren</option>';
 			optionHtml += '</select>';
 			break;
 
@@ -563,14 +563,17 @@ pascal.Clock.prototype.addControlEvents = function() {
 		if (this.value == 0) {
 			timeIndicators = false;
 			minutesIndicators = false;
+			document.getElementById('elegante-minuten').style.display = 'none';
 
 		} else if (this.value == 1) {
 			timeIndicators = true;
 			minutesIndicators = false;
+			document.getElementById('elegante-minuten').style.display = 'none';
 
 		} else if (this.value == 2) {
 			timeIndicators = true;
 			minutesIndicators = true;
+			document.getElementById('elegante-minuten').style.display = 'table-row';
 
 		}
 	});
